@@ -5,6 +5,9 @@ import me.chulgil.spring.sample.trace.TraceId;
 import me.chulgil.spring.sample.trace.TraceStatus;
 import org.springframework.stereotype.Component;
 
+/**
+ *
+ */
 @Slf4j
 @Component
 public class HelloTraceV2 {
@@ -21,7 +24,7 @@ public class HelloTraceV2 {
     public TraceStatus begin(String message) {
         TraceId traceId = new TraceId();
         Long startTimeMs = System.currentTimeMillis();
-        log.info("[{}] {}{}", traceId.getId(), addSpace(START_PREFIX, traceId.getLevel()), message);
+        log.info("[" + traceId.getId() + "] " + addSpace(START_PREFIX, traceId.getLevel()) + message);
         return new TraceStatus(traceId, startTimeMs, message);
     }
 
@@ -56,9 +59,22 @@ public class HelloTraceV2 {
     private static String addSpace(String prefix, int level) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < level; i++) {
-            sb.append((i == level - 1) ? "|" + prefix : "|   ");
+            sb.append( (i == level - 1) ? "|" + prefix : "|   ");
         }
         return sb.toString();
+    }
+
+    /**
+     * 파라미터 동기화 시작
+     * @param beforeTraceId
+     * @param message
+     * @return
+     */
+    public TraceStatus beginSync(TraceId beforeTraceId, String message) {
+        TraceId nextId = beforeTraceId.createNextId();
+        Long startTimeMs = System.currentTimeMillis();
+        log.info("[" + nextId.getId() + "] " + addSpace(START_PREFIX, nextId.getLevel()) + message);
+        return new TraceStatus(nextId, startTimeMs, message);
     }
 
 }

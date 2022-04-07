@@ -1,8 +1,9 @@
 package me.chulgil.spring.sample.app.v2;
 
 import lombok.RequiredArgsConstructor;
+import me.chulgil.spring.sample.trace.TraceId;
 import me.chulgil.spring.sample.trace.TraceStatus;
-import me.chulgil.spring.sample.trace.hellotrace.HelloTraceV1;
+import me.chulgil.spring.sample.trace.hellotrace.HelloTraceV2;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -11,15 +12,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderController {
 
     private final OrderService orderService;
-    private final HelloTraceV1 trace;
+    private final HelloTraceV2 trace;
 
-    @GetMapping("/v1/request")
-    public String request(String itemId) {
+    @GetMapping("/v2/request")
+    public String request(TraceId traceId, String itemId) {
 
         TraceStatus status = null;
         try {
             status = trace.begin("OrderController.request()");
-            orderService.orderItem(itemId);
+            orderService.orderItem(traceId, itemId);
             trace.end(status);
             return "ok";
         } catch (Exception e) {

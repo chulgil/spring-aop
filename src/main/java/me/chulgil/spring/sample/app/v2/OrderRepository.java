@@ -1,8 +1,9 @@
 package me.chulgil.spring.sample.app.v2;
 
 import lombok.RequiredArgsConstructor;
+import me.chulgil.spring.sample.trace.TraceId;
 import me.chulgil.spring.sample.trace.TraceStatus;
-import me.chulgil.spring.sample.trace.hellotrace.HelloTraceV1;
+import me.chulgil.spring.sample.trace.hellotrace.HelloTraceV2;
 import org.springframework.stereotype.Repository;
 
 
@@ -10,13 +11,13 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class OrderRepository {
 
-    private final HelloTraceV1 trace;
+    private final HelloTraceV2 trace;
 
-    public  void save(String itemId) {
+    public  void save(TraceId traceId, String itemId) {
 
         TraceStatus status = null;
         try {
-            status = trace.begin("OrderRepository.save()");
+            status = trace.beginSync(traceId, "OrderRepository.save()");
 
             // 예외 발생 상황 확인용
             if (itemId.equals("ex")) {

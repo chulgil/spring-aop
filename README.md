@@ -46,18 +46,53 @@
 ```console
 curl http://localhost:8080/v1/request\?itemId\=hello
 ```
-
+>실행 로그
 ```console
-2022-04-07 18:06:58.977  INFO 87714 --- [nio-8080-exec-1] m.c.s.s.trace.hellotrace.HelloTraceV1    : [ed67e946] OrderController.request()
-2022-04-07 18:06:58.978  INFO 87714 --- [nio-8080-exec-1] m.c.s.s.trace.hellotrace.HelloTraceV1    : [97bdb531] OrderService.orderItem()
-2022-04-07 18:06:58.978  INFO 87714 --- [nio-8080-exec-1] m.c.s.s.trace.hellotrace.HelloTraceV1    : [21f39438] OrderRepository.save()
-2022-04-07 18:06:59.978  INFO 87714 --- [nio-8080-exec-1] m.c.s.s.trace.hellotrace.HelloTraceV1    : [21f39438] OrderRepository.save() time=1000ms
-2022-04-07 18:06:59.979  INFO 87714 --- [nio-8080-exec-1] m.c.s.s.trace.hellotrace.HelloTraceV1    : [97bdb531] OrderService.orderItem() time=1001ms
-2022-04-07 18:06:59.979  INFO 87714 --- [nio-8080-exec-1] m.c.s.s.trace.hellotrace.HelloTraceV1    : [ed67e946] OrderController.request() time=1002ms
+HelloTraceV1    : [ed67e946] OrderController.request()
+HelloTraceV1    : [97bdb531] OrderService.orderItem()
+HelloTraceV1    : [21f39438] OrderRepository.save()
+HelloTraceV1    : [21f39438] OrderRepository.save() time=1000ms
+HelloTraceV1    : [97bdb531] OrderService.orderItem() time=1001ms
+HelloTraceV1    : [ed67e946] OrderController.request() time=1002ms
 ```
 
 ### 로그추적기 V2 : 파라미터로 동기화 개발
-> 메서드 호출 깊이를 표현
-> HTTP 요청단위로 구분
-- 처음 로그에서 사용한 상태정보(트랜잭션ID와 level)를 다음 로그로 넘겨주면 된다.
+> 메서드 호출 깊이를 표현하고 HTTP 요청단위로 구분
+> 
+> 처음 로그에서 사용한 상태정보(트랜잭션ID와 level)를 다음 로그로 넘겨주면 된다.
+
 - 즉 TraceId에 상태정보가 포함되어 있기때문에 다음로그로 넘겨준다.
+- 기존 TranceId에서 createNextId()를 통해 다음 ID를 구한다.
+  - 트랜잭션ID는 기존과 같이 유지하고 깊이를 표현하는 level은 1 증가
+  
+
+> 정상 실행 로그
+```console
+curl http://localhost:8080/v2/request\?itemId\=hello
+```
+
+```console
+HelloTraceV2    : [20559224] OrderController.request()
+HelloTraceV2    : [ae0b3e89] OrderService.orderItem()
+HelloTraceV2    : [ae0b3e89] |-->OrderRepository.save()
+HelloTraceV2    : [ae0b3e89] |<--OrderRepository.save() time=1005ms
+HelloTraceV2    : [ae0b3e89] OrderService.orderItem() time=1007ms
+HelloTraceV2    : [20559224] OrderController.request() time=1007ms
+```
+
+> 예외 실행 로그
+```console
+curl http://localhost:8080/v2/request\?itemId\=ex
+```
+
+```console
+HelloTraceV2    : [a3880905] OrderController.request()
+HelloTraceV2    : [85c7c795] OrderService.orderItem()
+HelloTraceV2    : [85c7c795] |-->OrderRepository.save()
+HelloTraceV2    : [85c7c795] |<X-OrderRepository.save() time=1ms ex=java.lang.IllegalStateException: 예외 발생!
+HelloTraceV2    : [85c7c795] OrderService.orderItem() time=1ms ex=java.lang.IllegalStateException: 예외 발생!
+HelloTraceV2    : [a3880905] OrderController.request() time=2ms ex=java.lang.IllegalStateException: 예외 발생!
+```
+
+
+
