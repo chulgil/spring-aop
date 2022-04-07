@@ -36,3 +36,19 @@
 [b7119f27] |<X-OrderService.orderItem() time=10ms ex=java.lang.IllegalStateException: 예외 발생! 
 [b7119f27] OrderController.request() time=11ms ex=java.lang.IllegalStateException: 예외 발생!
 ```
+
+
+### 로그추적기 V1 테스트
+
+```console
+curl http://localhost:8080/v1/request\?itemId\=hello
+```
+
+```console
+2022-04-07 18:06:58.977  INFO 87714 --- [nio-8080-exec-1] m.c.s.s.trace.hellotrace.HelloTraceV1    : [ed67e946] OrderController.request()
+2022-04-07 18:06:58.978  INFO 87714 --- [nio-8080-exec-1] m.c.s.s.trace.hellotrace.HelloTraceV1    : [97bdb531] OrderService.orderItem()
+2022-04-07 18:06:58.978  INFO 87714 --- [nio-8080-exec-1] m.c.s.s.trace.hellotrace.HelloTraceV1    : [21f39438] OrderRepository.save()
+2022-04-07 18:06:59.978  INFO 87714 --- [nio-8080-exec-1] m.c.s.s.trace.hellotrace.HelloTraceV1    : [21f39438] OrderRepository.save() time=1000ms
+2022-04-07 18:06:59.979  INFO 87714 --- [nio-8080-exec-1] m.c.s.s.trace.hellotrace.HelloTraceV1    : [97bdb531] OrderService.orderItem() time=1001ms
+2022-04-07 18:06:59.979  INFO 87714 --- [nio-8080-exec-1] m.c.s.s.trace.hellotrace.HelloTraceV1    : [ed67e946] OrderController.request() time=1002ms
+```
