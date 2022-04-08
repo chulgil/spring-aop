@@ -2,22 +2,23 @@ package me.chulgil.spring.sample.trace.threadlocal;
 
 import lombok.extern.slf4j.Slf4j;
 import me.chulgil.spring.sample.trace.threadlocal.code.FieldService;
+import me.chulgil.spring.sample.trace.threadlocal.code.ThreadLocalService;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
 public class ThreadLocalServiceTest {
 
-    private FieldService fieldService = new FieldService();
+    private ThreadLocalService service = new ThreadLocalService();
 
     @Test
     void field() {
 
         log.info("main start");
         Runnable userA = () -> {
-            fieldService.logic("userA");
+            service.logic("userA");
         };
         Runnable userB = () -> {
-            fieldService.logic("userB");
+            service.logic("userB");
         };
         Thread threadA = new Thread(userA);
         threadA.setName("thread-A");
