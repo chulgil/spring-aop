@@ -187,6 +187,7 @@ ThreadLocalLogTrace   : [ceb76639] OrderController.request() time=1004ms
 8. threadA 전용 보관소에 UserA데이터가 존재
 
 
+
 1. UserB의 HTTP 할당 요청
 2. WAS는 쓰레드 풀에서 하나 조회
 3. 쓰레드 threadA 할당
@@ -207,7 +208,8 @@ ThreadLocalLogTrace   : [ceb76639] OrderController.request() time=1004ms
 > 템플릿 메서드 패턴은 이런 문제를 해결하는 디자인 패턴이다.
 
 > TemplateMethodTest -> templateMethod()을 호출하면 아래와 같은 실행 결과가 나온다.
-> 아래 비지니스 로직과 실행 시간을 분리 해야한다.
+> 아래 비지니스 로직과 실행 시간을 분리 해야 한다.
+
 ```console
 비즈니스 로직1 실행 
 resultTime=5
@@ -220,3 +222,18 @@ resultTime=1
 > Abstract클래스를 생성하고 하위 클래스에서 call() 메서드를 오버라이딩하여 분리 하는 방법이 있다.
 > 하지만 하위 클래스를 계속 만들어야 하는 단점이 있다.
 
+### 템플릿 메서드 패턴 - 익명 내부 클래스
+
+익명 내부 클래스는 객체 인스턴스 생성과 동시에 상속 받은 자식클래스를 정의 할 수 있다.
+실행 결과를 보면 자바가 임의로 내부클래스 이름을 생성해 주는 것을 알 수 있다.
+
+TemplateMethodTest -> templateMethod()을 호출하면 아래와 같은 실행 결과가 나온다.
+
+```console
+TemplateMethodTest - 클래스 이름1=class me.chulgil.spring.sample.trace.template.TemplateMethodTest$1
+TemplateMethodTest - 비즈니스 로직1 실행
+AbstractTemplate - resultTime=0
+TemplateMethodTest - 클래스 이름2=class me.chulgil.spring.sample.trace.template.TemplateMethodTest$2
+TemplateMethodTest - 비즈니스 로직2 실행
+AbstractTemplate - resultTime=0
+```
