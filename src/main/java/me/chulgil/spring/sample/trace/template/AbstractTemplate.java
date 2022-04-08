@@ -1,12 +1,13 @@
-package me.chulgil.spring.sample.trace;
+package me.chulgil.spring.sample.trace.template;
 
+import me.chulgil.spring.sample.trace.TraceStatus;
 import me.chulgil.spring.sample.trace.logtrace.LogTrace;
 
-public abstract class AbstractTemplete<T> {
+public abstract class AbstractTemplate<T> {
 
     private final LogTrace trace;
 
-    protected AbstractTemplete(LogTrace trace) {
+    protected AbstractTemplate(LogTrace trace) {
         this.trace = trace;
     }
 

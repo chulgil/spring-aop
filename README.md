@@ -237,3 +237,40 @@ TemplateMethodTest - 클래스 이름2=class me.chulgil.spring.sample.trace.temp
 TemplateMethodTest - 비즈니스 로직2 실행
 AbstractTemplate - resultTime=0
 ```
+### 로그추적기 V4 : 템플릿 메서드 패턴
+> 적용한 실행 결과는 아래와 같다.
+
+```console
+curl http://localhost:8080/v4/request\?itemId\=hello &curl http://localhost:8080/v4/request\?itemId\=hello
+```
+
+```console
+ThreadLocalLogTrace   : [120c2d30] OrderController.request()
+ThreadLocalLogTrace   : [120c2d30] |-->OrderService.orderItem()
+ThreadLocalLogTrace   : [120c2d30] |   |-->OrderRepository.save()
+ThreadLocalLogTrace   : [120c2d30] |   |<--OrderRepository.save() time=1002m
+ThreadLocalLogTrace   : [120c2d30] |<--OrderService.orderItem() time=1003ms
+ThreadLocalLogTrace   : [120c2d30] OrderController.request() time=1005ms
+ThreadLocalLogTrace   : [372c2af8] OrderController.request()
+ThreadLocalLogTrace   : [372c2af8] |-->OrderService.orderItem()
+ThreadLocalLogTrace   : [372c2af8] |   |-->OrderRepository.save()
+ThreadLocalLogTrace   : [372c2af8] |   |<--OrderRepository.save() time=1011m
+ThreadLocalLogTrace   : [372c2af8] |<--OrderService.orderItem() time=1011ms
+ThreadLocalLogTrace   : [372c2af8] OrderController.request() time=1011ms
+```
+
+지금까지 로그 추적기를 생성한 것을 보면 아래와 같다.
+
+- 로그추적기 V0 : 핵심 기능만 있다.
+- 로그추적기 V3 : 핵심 기능과 부가 기능이 섞여 있다.
+- 로그추적기 V4 : 핵심 기능과 템플릿을 호출하는 코드가 섞여 있다.
+
+이로서 V4에서 로그를 남기는 부분은 단일 책임 원칙(SRP)을 적용 하였다.
+따라서 변경 지점을 하나로 모아서 변경에 쉽게 대처 할 수 있다.
+하지만 상속에 강하게 의존하고 있기때문에 부모 클래스를 수정하면 자식 클래스에도 영향을 주는 단점이 존재한다.
+또한 별도의 클래스나 익명 내부 클래스를 만들어야 하는 복잡함도 존재한다.
+
+템플릿 메서드 패턴과 비슷한 역할을 하면서 상속의 단점을 제거할 수 있는 디자인 패턴이 있다.
+바로 Strategy Pattern 이다.
+
+
