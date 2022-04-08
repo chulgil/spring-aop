@@ -1,10 +1,13 @@
-package me.chulgil.spring.sample.trace.strategy;
+package me.chulgil.spring.sample.trace.strategy.v2;
 
 import lombok.extern.slf4j.Slf4j;
+import me.chulgil.spring.sample.trace.strategy.Strategy;
+import me.chulgil.spring.sample.trace.strategy.StrategyLogic1;
+import me.chulgil.spring.sample.trace.strategy.StrategyLogic2;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class ContextV1Test {
+public class ContextTest {
 
     @Test
     void strategyV0() {
@@ -18,10 +21,10 @@ public class ContextV1Test {
     @Test
     void strategyV1() {
         Strategy strategyLogic1 = new StrategyLogic1();
-        ContextV1 context1 = new ContextV1(strategyLogic1);
+        Context context1 = new Context(strategyLogic1);
         context1.execute();
         Strategy strategyLogic2 = new StrategyLogic2();
-        ContextV1 context2 = new ContextV1(strategyLogic2);
+        Context context2 = new Context(strategyLogic2);
         context2.execute();
     }
 
@@ -39,7 +42,7 @@ public class ContextV1Test {
             }
         };
         log.info("strategyLogic1={}", strategyLogic1.getClass());
-        ContextV1 context1 = new ContextV1(strategyLogic1);
+        Context context1 = new Context(strategyLogic1);
         context1.execute();
 
         Strategy strategyLogic2 = new Strategy() {
@@ -49,7 +52,7 @@ public class ContextV1Test {
             }
         };
         log.info("strategyLogic2={}", strategyLogic2.getClass());
-        ContextV1 context2 = new ContextV1(strategyLogic2);
+        Context context2 = new Context(strategyLogic2);
         context2.execute();
     }
 
@@ -58,7 +61,7 @@ public class ContextV1Test {
      */
     @Test
     void strategyV3() {
-        ContextV1 context1 = new ContextV1(new Strategy() {
+        Context context1 = new Context(new Strategy() {
             @Override
             public void call() {
                 log.info("비즈니스 로직1 실행");
@@ -66,7 +69,7 @@ public class ContextV1Test {
         });
         context1.execute();
 
-        ContextV1 context2 = new ContextV1(new Strategy() {
+        Context context2 = new Context(new Strategy() {
             @Override
             public void call() {
                 log.info("비즈니스 로직2 실행");
@@ -80,10 +83,10 @@ public class ContextV1Test {
      */
     @Test
     void strategyV4() {
-        ContextV1 context1 = new ContextV1(() -> log.info("비즈니스 로직1 실행"));
+        Context context1 = new Context(() -> log.info("비즈니스 로직1 실행"));
         context1.execute();
 
-        ContextV1 context2 = new ContextV1(() -> log.info("비즈니스 로직2 실행"));
+        Context context2 = new Context(() -> log.info("비즈니스 로직2 실행"));
         context2.execute();
     }
 

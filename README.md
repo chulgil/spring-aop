@@ -285,3 +285,15 @@ ThreadLocalLogTrace   : [372c2af8] OrderController.request() time=1011ms
 Context에 setter를 제공해서 전략을 변경하면 되지만
 Context를 싱글톤으로 사용할 때는 동시성 이슈 등 고려할 점이 많다.
 따라서 전략을 실시간으로 변경해야 한다면 차라리 Context를 하나더 생성하고 그곳에 다른 전략을 주입하는 것이 더 나은 선택일 수 있다.
+
+이렇게 먼저 조립하고 사용하는 방식보다는 유연하게 전략 패턴을 사용하는 방법이 있다.
+
+진략을 실행할 때 직접 파라미터로 전달해서 사용하는 방법이다.
+
+1. 클라이언트는 Context를 실행하면서 인수로 Strategy를 전달한다.
+2. Context는 execute() 로직을 실행한다.
+3. Context는 파라미터로 넘어온 strategy.call() 로직을 실행한다.
+4. Context의 execute() 로직이 종료된다.
+
+이 방법은 실행할 때 마다 전략을 유연하게 변경할 수 있지만 
+실행할 때 마다 전략을 지정해 주어야 하는 단점이 존재 한다.

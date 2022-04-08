@@ -1,15 +1,17 @@
-package me.chulgil.spring.sample.trace.strategy;
+package me.chulgil.spring.sample.trace.strategy.v1;
 
 import lombok.extern.slf4j.Slf4j;
+import me.chulgil.spring.sample.trace.strategy.Strategy;
 
 @Slf4j
-public class ContextV1 {
+public class Context {
 
     private final Strategy strategy;
 
-    public ContextV1(Strategy strategy) {
+    public Context(Strategy strategy) {
         this.strategy = strategy;
     }
+
 
     public void execute() {
         long startTime = System.currentTimeMillis();
