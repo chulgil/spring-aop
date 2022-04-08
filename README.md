@@ -104,4 +104,49 @@ HelloTraceV2    : [830d6e00] OrderController.request() time=1ms ex=java.lang.Ill
 ### 로그추적기 V3 : 필드 동기화 개발
 
 > V2의 단점인 `TranceId`을 파라미터로 넘기지 않기위해 인터페이스를 이용하여 새로운 로그추적기 V3을 구현한다.
+> 
+> 인터페이스를 구현하고 `TranceIdHolder`필드를 사용해서 파라미터 추가 없는 깔끔한 로그 추적기를 완성했지만
+> 
+> 실제 서비스 배포시에는 아래와 같은 동시성 호출 문제가 발생한다.
+```console
+curl http://localhost:8080/v2/request\?itemId\=hello
+curl http://localhost:8080/v2/request\?itemId\=hello
+```
+
+```console
+FieldLogTrace     : [3017dee5] OrderController.request()
+FieldLogTrace     : [3017dee5] |-->OrderService.orderItem()
+FieldLogTrace     : [3017dee5] |   |-->OrderRepository.save()
+FieldLogTrace     : [3017dee5] |   |   |-->OrderController.request()
+FieldLogTrace     : [3017dee5] |   |   |   |-->OrderService.orderItem()
+FieldLogTrace     : [3017dee5] |   |   |   |   |-->OrderRepository.save()
+FieldLogTrace     : [3017dee5] |   |<--OrderRepository.save() time=1008ms
+FieldLogTrace     : [3017dee5] |<--OrderService.orderItem() time=1015ms
+FieldLogTrace     : [3017dee5] OrderController.request() time=1017ms
+FieldLogTrace     : [3017dee5] |   |   |   |   |<--OrderRepository.save() time=1002ms
+FieldLogTrace     : [3017dee5] |   |   |   |<--OrderService.orderItem() time=1003ms
+FieldLogTrace     : [3017dee5] |   |   |<--OrderController.request() time=1003ms
+```
+
+`FieldLogTrace` 는 싱글톤으로 등록된 스프링 빈이다. 이 객체의 인스턴스가 애플리케이션에 하나 존재하기 때문에
+여러 쓰레드에서 `FieldLogTrace.traceIdHolder` 동시에 접근하면 이런 문제가 발생한다.
+
+### 동시성 문제 테스트 코드 작성
+
+> FieldServiceTest -> feild() 를 실행하게 되면 결과는 아래와 같다. 
+
+```console
+FieldServiceTest - main start
+FieldService - 저장 name=userA -> name
+FieldService - 저장 name=userB -> name
+FieldService - 조회 nameStore=userB
+FieldService - 조회 nameStore=userB
+FieldServiceTest - main exit
+```
+
+> 기대 값은 userA와 userB가 조회 되어야 하지만 userB만 조회 되므로 동시성 이슈가 발생 함을 알 수 있다.
+>  
+> 지역 변수는 쓰레드 마다 각각 다른 메모리 영역이 할당 되므로 동시성 이슈는 없다.
+> 
+> 싱글톤 또는 static 필드에 접근할 때 어디선가 값을 변경하게 되면 동시성 이슈가 발생하게 된다.
 
