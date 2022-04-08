@@ -72,12 +72,12 @@ curl http://localhost:8080/v2/request\?itemId\=hello
 ```
 
 ```console
-HelloTraceV2    : [20559224] OrderController.request()
-HelloTraceV2    : [ae0b3e89] OrderService.orderItem()
-HelloTraceV2    : [ae0b3e89] |-->OrderRepository.save()
-HelloTraceV2    : [ae0b3e89] |<--OrderRepository.save() time=1005ms
-HelloTraceV2    : [ae0b3e89] OrderService.orderItem() time=1007ms
-HelloTraceV2    : [20559224] OrderController.request() time=1007ms
+HelloTraceV2    : [ceadf128] OrderController.request()
+HelloTraceV2    : [c24461a4] |-->OrderService.orderItem()
+HelloTraceV2    : [c24461a4] |   |-->OrderRepository.save()
+HelloTraceV2    : [c24461a4] |   |<--OrderRepository.save() time=1006ms
+HelloTraceV2    : [c24461a4] |<--OrderService.orderItem() time=1011ms
+HelloTraceV2    : [ceadf128] OrderController.request() time=1012ms
 ```
 
 > 예외 실행 로그
@@ -86,12 +86,12 @@ curl http://localhost:8080/v2/request\?itemId\=ex
 ```
 
 ```console
-HelloTraceV2    : [a3880905] OrderController.request()
-HelloTraceV2    : [85c7c795] OrderService.orderItem()
-HelloTraceV2    : [85c7c795] |-->OrderRepository.save()
-HelloTraceV2    : [85c7c795] |<X-OrderRepository.save() time=1ms ex=java.lang.IllegalStateException: 예외 발생!
-HelloTraceV2    : [85c7c795] OrderService.orderItem() time=1ms ex=java.lang.IllegalStateException: 예외 발생!
-HelloTraceV2    : [a3880905] OrderController.request() time=2ms ex=java.lang.IllegalStateException: 예외 발생!
+HelloTraceV2    : [830d6e00] OrderController.request()
+HelloTraceV2    : [78d3cdac] |-->OrderService.orderItem()
+HelloTraceV2    : [78d3cdac] |   |-->OrderRepository.save()
+HelloTraceV2    : [78d3cdac] |   |<X-OrderRepository.save() time=0ms ex=java.lang.IllegalStateException: 예외 발생!
+HelloTraceV2    : [78d3cdac] |<X-OrderService.orderItem() time=0ms ex=java.lang.IllegalStateException: 예외 발생!
+HelloTraceV2    : [830d6e00] OrderController.request() time=1ms ex=java.lang.IllegalStateException: 예외 발생!
 ```
 
 
