@@ -304,3 +304,29 @@ Context를 싱글톤으로 사용할 때는 동시성 이슈 등 고려할 점�
 > 이렇게 다른 코드의 인수로서 넘겨주는 실행 가능한 코드를 콜백(callback)이라 한다.
 > 스프링에서는 상기 전략패턴을 `템플릿 콜백 패턴`이라 한다.
 
+
+```console
+curl http://localhost:8080/v5/request\?itemId\=hello &curl http://localhost:8080/v5/request\?itemId\=hello
+```
+
+```console
+ThreadLocalLogTrace   : [592756ac] OrderController.request()
+ThreadLocalLogTrace   : [592756ac] |-->OrderController.request()
+ThreadLocalLogTrace   : [592756ac] |   |-->OrderRepository.save()
+ThreadLocalLogTrace   : [592756ac] |   |<--OrderRepository.save() time=1004m
+ThreadLocalLogTrace   : [592756ac] |<--OrderController.request() time=1004ms
+ThreadLocalLogTrace   : [592756ac] OrderController.request() time=1005ms
+
+ThreadLocalLogTrace   : [3b3d4313] OrderController.request()
+ThreadLocalLogTrace   : [3b3d4313] |-->OrderController.request()
+ThreadLocalLogTrace   : [3b3d4313] |   |-->OrderRepository.save()
+ThreadLocalLogTrace   : [3b3d4313] |   |<--OrderRepository.save() time=1001m
+ThreadLocalLogTrace   : [3b3d4313] |<--OrderController.request() time=1002ms
+ThreadLocalLogTrace   : [3b3d4313] OrderController.request() time=1004ms
+```
+
+> 이로서 변하는 코드와 변하지 않는 코드를 적용하고 콜백으로 람다를 사용하여 코드 사용도 최소화 하였다.
+> 그런데 아무리 최적화를 하여도 결국 로그 추적기를 적용하기 위해서 원본 코드를 수정해야 한다는 단점이 존재한다.
+> 원본 코드를 손대지 않고 로그 추적기를 적용할 수 있는 방법 또한 존재한다.
+
+

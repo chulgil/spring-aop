@@ -1,30 +1,30 @@
 package me.chulgil.spring.sample.app.v5;
 
-import lombok.RequiredArgsConstructor;
+import me.chulgil.spring.sample.trace.callback.TraceCallback;
+import me.chulgil.spring.sample.trace.callback.TraceTemplate;
 import me.chulgil.spring.sample.trace.logtrace.LogTrace;
-import me.chulgil.spring.sample.trace.template.AbstractTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequiredArgsConstructor
 public class OrderController {
 
     private final OrderService orderService;
-    private final LogTrace trace;
+    private final TraceTemplate template;
 
-    @GetMapping("/v4/request")
+    public OrderController(OrderService service, LogTrace trace) {
+        this.orderService = service;
+        this.template = new TraceTemplate(trace);
+    }
+
+    @GetMapping("/v5/request")
     public String request(String itemId) {
-
-        AbstractTemplate<String> template = new AbstractTemplate<>(trace) {
+        return template.execute("OrderController.request()", new TraceCallback<>() {
             @Override
-            protected String call() {
+            public String call() {
                 orderService.orderItem(itemId);
                 return "ok";
             }
-        };
-
-        return template.execute("OrderController.request()");
-
+        });
     }
 }

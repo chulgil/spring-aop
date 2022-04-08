@@ -1,31 +1,30 @@
 package me.chulgil.spring.sample.app.v5;
 
 import lombok.RequiredArgsConstructor;
+import me.chulgil.spring.sample.trace.callback.TraceTemplate;
 import me.chulgil.spring.sample.trace.logtrace.LogTrace;
 import me.chulgil.spring.sample.trace.template.AbstractTemplate;
 import org.springframework.stereotype.Repository;
 
 
 @Repository
-@RequiredArgsConstructor
 public class OrderRepository {
 
-    private final LogTrace trace;
+    private final TraceTemplate template;
+
+    public OrderRepository(LogTrace trace) {
+        this.template = new TraceTemplate(trace);
+    }
 
     public  void save(String itemId) {
-        AbstractTemplate<Void> template = new AbstractTemplate<>(trace) {
 
-            @Override
-            protected Void call() {
-                //저장 로직
-                if (itemId.equals("ex")) {
-                    throw new IllegalStateException("예외 발생!"); }
-                sleep(1000);
-                return null;
+        template.execute("OrderRepository.save()", () -> {
+            if (itemId.equals("ex")) {
+                throw new IllegalStateException("예외 발생!");
             }
-        };
-        template.execute("OrderRepository.save()");
-
+            sleep(1000);
+            return null;
+        });
     }
 
     private void sleep(int millis) {
