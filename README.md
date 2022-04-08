@@ -94,5 +94,14 @@ HelloTraceV2    : [78d3cdac] |<X-OrderService.orderItem() time=0ms ex=java.lang.
 HelloTraceV2    : [830d6e00] OrderController.request() time=1ms ex=java.lang.IllegalStateException: 예외 발생!
 ```
 
+이로서 모든 요구사항을 구현했지만 아래와 같은 단점이 존재한다.
+1. HTTP 요청 구분을 위해 `TranceId` 동기화가 필요하다.
+2. 동기화를 위해 관련 메서드의 모든 파라미터를 수정해야 한다.
+3. 로그 처음 시작시 `begin()`을 호출하고, 두번째 부터는 `beginSync()`를 호출해야 한다. 
+4. 컨트롤러 -> 서비스 호출이 아닌 서브모듈 -> 서비스 호출상황에서는 파라미터로 넘길 `TranceId`가 존재하지 않는다.
 
+
+### 로그추적기 V3 : 필드 동기화 개발
+
+> V2의 단점인 `TranceId`을 파라미터로 넘기지 않기위해 인터페이스를 이용하여 새로운 로그추적기 V3을 구현한다.
 
