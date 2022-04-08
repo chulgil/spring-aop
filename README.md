@@ -1,6 +1,6 @@
 # spring-aop
 
-## 로그추적기
+## 1. 로그추적기
 
 ### 요구사항 분석
 
@@ -131,6 +131,8 @@ FieldLogTrace     : [3017dee5] |   |   |<--OrderController.request() time=1003ms
 `FieldLogTrace` 는 싱글톤으로 등록된 스프링 빈이다. 이 객체의 인스턴스가 애플리케이션에 하나 존재하기 때문에
 여러 쓰레드에서 `FieldLogTrace.traceIdHolder` 동시에 접근하면 이런 문제가 발생한다.
 
+## 2. 동시성 문제 
+
 ### 동시성 문제 테스트 코드 작성
 
 > FieldServiceTest -> feild() 를 실행하게 되면 결과는 아래와 같다. 
@@ -194,4 +196,22 @@ ThreadLocalLogTrace   : [ceb76639] OrderController.request() time=1004ms
 > 결과적으로 UserB는 UserA의 데이터를 확인하게 되는 심각한 문제가 발생하게 되므로
 > 
 > 이런 문제를 예방하려면 UserA의 요청이 끝날대 로컬의 값을 `ThreadLocal.remove()`를 통해서 꼭 제거해야 한다.
-> 
+>
+
+## 3. 템플릿 메서드 패턴과 콜백 패턴
+
+### 템플릿 메서드 패턴 - 시작
+
+> 좋은 설계는 변하는 것과 변하지 않는 것을 분리 하는 것이다.
+> 즉 핵심 기능은 변하고, 로그 추적기를 사용하는 부분은 변하지 않는다.
+> 템플릿 메서드 패턴은 이런 문제를 해결하는 디자인 패턴이다.
+
+> TemplateMethodTest -> templateMethod()을 호출하면 아래와 같은 실행 결과가 나온다.
+> 아래 비지니스 로직과 실행 시간을 분리 해야한다.
+```console
+비즈니스 로직1 실행 
+resultTime=5
+비즈니스 로직2 실행 
+resultTime=1
+```
+
