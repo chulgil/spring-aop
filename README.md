@@ -109,7 +109,7 @@ HelloTraceV2    : [830d6e00] OrderController.request() time=1ms ex=java.lang.Ill
 > 
 > 실제 서비스 배포시에는 아래와 같은 동시성 호출 문제가 발생한다.
 ```console
-curl http://localhost:8080/v2/request\?itemId\=hello
+curl http://localhost:8080/v2/request\?itemId\=hello &
 curl http://localhost:8080/v2/request\?itemId\=hello
 ```
 
@@ -150,3 +150,48 @@ FieldServiceTest - main exit
 > 
 > 싱글톤 또는 static 필드에 접근할 때 어디선가 값을 변경하게 되면 동시성 이슈가 발생하게 된다.
 
+### 로그추적기 V3 : 쓰레드 동기화 개발
+
+```console
+curl http://localhost:8080/v3/request\?itemId\=hello &
+curl http://localhost:8080/v3/request\?itemId\=hello
+```
+
+```console
+ThreadLocalLogTrace   : [e2a2cd5b] OrderController.request()
+ThreadLocalLogTrace   : [e2a2cd5b] |-->OrderService.orderItem()
+ThreadLocalLogTrace   : [e2a2cd5b] |   |-->OrderRepository.save()
+ThreadLocalLogTrace   : [e2a2cd5b] |   |<--OrderRepository.save() time=1004ms
+ThreadLocalLogTrace   : [e2a2cd5b] |<--OrderService.orderItem() time=1004ms
+ThreadLocalLogTrace   : [e2a2cd5b] OrderController.request() time=1005ms
+
+ThreadLocalLogTrace   : [ceb76639] OrderController.request()
+ThreadLocalLogTrace   : [ceb76639] |-->OrderService.orderItem()
+ThreadLocalLogTrace   : [ceb76639] |   |-->OrderRepository.save()
+ThreadLocalLogTrace   : [ceb76639] |   |<--OrderRepository.save() time=1001ms
+ThreadLocalLogTrace   : [ceb76639] |<--OrderService.orderItem() time=1003ms
+ThreadLocalLogTrace   : [ceb76639] OrderController.request() time=1004ms
+```
+> 동시에 실행 하여도 로그가 의도 대로 나누어 진 것을 확인할 수 있다.
+> 쓰레드 로컬의 값을 사용후 제거하지 않으면 WAS(톰캣)처럼 쓰레드 풀을 사용하는 경우에 심각한 문제가 발생할 수 있다.
+
+1. UserA의 HTTP 할당 요청
+2. WAS는 쓰레드 풀에서 하나 조회
+3. 쓰레드 threadA 할당
+4. threadA는 UserA의 데이터를 쓰레드 로컬에 저장
+5. UserA의 HTTP 응답 종료
+6. WAS는 사용이 끝난 threadA를 쓰레드 풀에서 반환
+7. 쓰레드 생성비용이 비싸므로 쓰레드 재사용 
+8. threadA 전용 보관소에 UserA데이터가 존재
+
+
+1. UserB의 HTTP 할당 요청
+2. WAS는 쓰레드 풀에서 하나 조회
+3. 쓰레드 threadA 할당
+4. threadA는 쓰레드 로컬에서 데어터 조회
+5. 쓰레드 로컬은 threadA의 UserA값 반환
+
+> 결과적으로 UserB는 UserA의 데이터를 확인하게 되는 심각한 문제가 발생하게 되므로
+> 
+> 이런 문제를 예방하려면 UserA의 요청이 끝날대 로컬의 값을 `ThreadLocal.remove()`를 통해서 꼭 제거해야 한다.
+> 
