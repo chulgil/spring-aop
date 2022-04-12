@@ -12,39 +12,32 @@ import org.springframework.context.annotation.Configuration;
 
 import java.lang.reflect.Proxy;
 
-@Configuration
 public class DynamicProxyBasicConfig {
 
     @Bean
     public IOrderController orderController(LogTrace logTrace) {
-        IOrderController controller = new OrderController(orderService(logTrace));
-        IOrderController proxy = (IOrderController) Proxy.newProxyInstance(
+        return (IOrderController) Proxy.newProxyInstance(
                 IOrderController.class.getClassLoader(),
                 new Class[]{IOrderController.class},
-                new LogTraceBasicHandler(controller, logTrace)
+                new LogTraceBasicHandler(new OrderController(orderService(logTrace)), logTrace)
         );
-        return proxy;
     }
 
     @Bean
     public IOrderService orderService(LogTrace logTrace) {
-        IOrderService service = new OrderService(orderRepository(logTrace));
-        IOrderService proxy = (IOrderService) Proxy.newProxyInstance(
+        return (IOrderService) Proxy.newProxyInstance(
                 IOrderService.class.getClassLoader(),
                 new Class[]{IOrderService.class},
-                new LogTraceBasicHandler(service, logTrace)
+                new LogTraceBasicHandler(new OrderService(orderRepository(logTrace)), logTrace)
         );
-        return proxy;
     }
 
     @Bean
     public IOrderRepository orderRepository(LogTrace logTrace) {
-        IOrderRepository repository = new OrderRepository();
-        IOrderRepository proxy = (IOrderRepository) Proxy.newProxyInstance(
+        return (IOrderRepository) Proxy.newProxyInstance(
                 IOrderRepository.class.getClassLoader(),
                 new Class[]{IOrderRepository.class},
-                new LogTraceBasicHandler(repository, logTrace)
+                new LogTraceBasicHandler(new OrderRepository(), logTrace)
         );
-        return proxy;
     }
 }

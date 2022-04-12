@@ -412,3 +412,14 @@ ThreadLocalLogTrace   : [eb2dd8a4] |   |<--IOrderRepository.save() time=1001ms
 ThreadLocalLogTrace   : [eb2dd8a4] |<--IOrderService.orderItem() time=1001ms
 ThreadLocalLogTrace   : [eb2dd8a4] IOrderController.request() time=1002ms
 ```
+
+> 로그 출력시 메서드 이름으로 필터 기능 추가
+
+특정 메서드 이름이 매칭되는 경우에만 LogTrace로직을 실행한다.
+
+스프링이 제공하는 PatternMatchUtils.simpleMatch(..) 를 사용하면 매칭 로직을 쉽게 적용 가능하다.
+- xx : xx가 정확히 매칭되면 True
+- xx* : xx로 시작하면 True
+- *xx : xx로 끝나면 True
+- *xx* : xx가 있으면 True
+- String[] patterns : 적용할 패턴은 생성자를 통해 외부에서 받는다.
