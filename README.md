@@ -345,3 +345,25 @@ GOF의 디자인패턴에서의 프록시 패턴은 접근제어가 목적이고
 Client -> Server 에서 Client -> Proxy 로 DI를 사용해서 객체 의존관계를 변경하면 
 로그추적기 클라이언트 코드를 변경하지 않아도 기능 구현이 가능하다.
 
+InterfaceProxyConfig를 통해 프록시를 적용하면 프록시 객체는 스프링 컨테이너가 관리하고 자바 힙 메모리에도 올라간다.
+
+반면에 실제 객체는 자바 힙 메모리에는 올라가지만 스프링 컨테이너가 관리하지는 않는다.
+
+런터임 객체 의존 관계는 다음과 같다.
+```console
+client -> controllerProxy -> controller -> serviceProxy -> service 
+```
+
+> 실행결과 
+```console
+curl http://localhost:8080/v1/request\?itemId\=hello
+```
+
+```console
+ThreadLocalLogTrace   : [5305b416] OrderController.request()
+ThreadLocalLogTrace   : [5305b416] |-->OrderService.orderItem()
+ThreadLocalLogTrace   : [5305b416] |   |-->OrderRepository.request()
+ThreadLocalLogTrace   : [5305b416] |   |<--OrderRepository.request() time=1005ms
+ThreadLocalLogTrace   : [5305b416] |<--OrderService.orderItem() time=1007ms
+ThreadLocalLogTrace   : [5305b416] OrderController.request() time=1007ms
+```

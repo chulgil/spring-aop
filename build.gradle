@@ -18,6 +18,11 @@ repositories {
 	mavenCentral()
 }
 
+springBoot {
+	mainClass = "me.chulgil.spring.proxy.ProxyApplication"
+}
+
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'
