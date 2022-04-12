@@ -55,7 +55,7 @@ HelloTraceV1    : [21f39438] OrderRepository.save() time=1000ms
 HelloTraceV1    : [97bdb531] OrderService.orderItem() time=1001ms
 HelloTraceV1    : [ed67e946] OrderController.request() time=1002ms
 ```
-
+---
 ### 로그추적기 V2 : 파라미터로 동기화 개발
 > 메서드 호출 깊이를 표현하고 HTTP 요청단위로 구분
 > 
@@ -100,7 +100,7 @@ HelloTraceV2    : [830d6e00] OrderController.request() time=1ms ex=java.lang.Ill
 3. 로그 처음 시작시 `begin()`을 호출하고, 두번째 부터는 `beginSync()`를 호출해야 한다. 
 4. 컨트롤러 -> 서비스 호출이 아닌 서브모듈 -> 서비스 호출상황에서는 파라미터로 넘길 `TranceId`가 존재하지 않는다.
 
-
+---
 ### 로그추적기 V3 : 필드 동기화 개발
 
 > V2의 단점인 `TranceId`을 파라미터로 넘기지 않기위해 인터페이스를 이용하여 새로운 로그추적기 V3을 구현한다.
@@ -131,6 +131,7 @@ FieldLogTrace     : [3017dee5] |   |   |<--OrderController.request() time=1003ms
 `FieldLogTrace` 는 싱글톤으로 등록된 스프링 빈이다. 이 객체의 인스턴스가 애플리케이션에 하나 존재하기 때문에
 여러 쓰레드에서 `FieldLogTrace.traceIdHolder` 동시에 접근하면 이런 문제가 발생한다.
 
+---
 ## 2. 동시성 문제 
 
 ### 동시성 문제 테스트 코드 작성
@@ -152,6 +153,7 @@ FieldServiceTest - main exit
 > 
 > 싱글톤 또는 static 필드에 접근할 때 어디선가 값을 변경하게 되면 동시성 이슈가 발생하게 된다.
 
+---
 ### 로그추적기 V3 : 쓰레드 동기화 개발
 
 ```console
@@ -199,6 +201,7 @@ ThreadLocalLogTrace   : [ceb76639] OrderController.request() time=1004ms
 > 이런 문제를 예방하려면 UserA의 요청이 끝날대 로컬의 값을 `ThreadLocal.remove()`를 통해서 꼭 제거해야 한다.
 >
 
+---
 ## 3. 템플릿 메서드 패턴과 콜백 패턴
 
 ### 템플릿 메서드 패턴 - 시작
@@ -237,6 +240,8 @@ TemplateMethodTest - 클래스 이름2=class me.chulgil.spring.sample.trace.temp
 TemplateMethodTest - 비즈니스 로직2 실행
 AbstractTemplate - resultTime=0
 ```
+
+---
 ### 로그추적기 V4 : 템플릿 메서드 패턴
 > 적용한 실행 결과는 아래와 같다.
 
@@ -273,7 +278,7 @@ ThreadLocalLogTrace   : [372c2af8] OrderController.request() time=1011ms
 템플릿 메서드 패턴과 비슷한 역할을 하면서 상속의 단점을 제거할 수 있는 디자인 패턴이 있다.
 바로 Strategy Pattern 이다.
 
-
+---
 ### 로그추적기 V4 : 전략 패턴
 
 > 전략 패턴은 변하지 않는 부분을 `Context`에 두고, 번하는 부분을 `Strategy`라는 인터페이스를 구현하여 문제를 해결한다.
@@ -298,6 +303,7 @@ Context를 싱글톤으로 사용할 때는 동시성 이슈 등 고려할 점�
 이 방법은 실행할 때 마다 전략을 유연하게 변경할 수 있지만 
 실행할 때 마다 전략을 지정해 주어야 하는 단점이 존재 한다.
 
+---
 ### 로그추적기 V5 :  템플릿 콜백 패턴
 
 > 상기 전략패턴의 두번째 방법은 변하지 않는 템플릿 역할을 한다. 변하는 부분은 파라미터로 넘어온 Strategy의 코드를 실행해서 처리한다.
@@ -328,7 +334,7 @@ ThreadLocalLogTrace   : [3b3d4313] OrderController.request() time=1004ms
 > 이로서 변하는 코드와 변하지 않는 코드를 적용하고 콜백으로 람다를 사용하여 코드 사용도 최소화 하였다.
 > 그런데 아무리 최적화를 하여도 결국 로그 추적기를 적용하기 위해서 원본 코드를 수정해야 한다는 단점이 존재한다.
 > 원본 코드를 손대지 않고 로그 추적기를 적용할 수 있는 방법 또한 존재한다.
-
+---
 ### 프록시 패턴
 
 프록시를 활용하면 아래 와 같은 기능을 활용 할 수 있다. 
@@ -367,3 +373,16 @@ ThreadLocalLogTrace   : [5305b416] |   |<--OrderRepository.request() time=1005ms
 ThreadLocalLogTrace   : [5305b416] |<--OrderService.orderItem() time=1007ms
 ThreadLocalLogTrace   : [5305b416] OrderController.request() time=1007ms
 ```
+
+> 인터페이스 기반 프록시와 클래스 기반 프록시
+
+- 인터페이스가 없어도 클래스 기반으로 프록시를 생성할 수 있다.
+- 클래스는 해당 클래스에만 적용할 수 있고 인터페이스는 같은 인터페이스를 사용하는 모든 곳에 적용할 수 있다.
+- 클래스 기반 프록시는 상속을 사용하기 때문에 부모클래스의 생성자를 호출해야하는 점과 final 키워드가 있으면 상속이 불가능한 단점이 있다.
+- 인터페이스 기반 프록시의 단점은 인터페이스가 필요하다는 것과  캐스팅관련 단점이 있다.
+
+> 지금까지 작성한 프록시 클래스는 대상 클래스가 100개 있다면 프록시 클래스도 100개를 다 만들어야 하는 단점이 존재한다.
+>
+> 이 부분을 동적 프록시 기술로 해결할 수 있다.
+
+
