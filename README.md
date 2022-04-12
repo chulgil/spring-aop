@@ -385,4 +385,30 @@ ThreadLocalLogTrace   : [5305b416] OrderController.request() time=1007ms
 >
 > 이 부분을 동적 프록시 기술로 해결할 수 있다.
 
+### JDK 프록시 패턴
 
+동적 프록시 또한 인터페이스가 필수이기 때문에 V1 애플리케이션에 적용한다.
+
+실행 순서는 다음과 같다.
+1. 클라이언트는 JDK동적 프록시의 call() 실행
+2. 프록시는 (TimeInvocationHandler) InvocationHandler.invoke() 호출
+3. 내부로직 수행후 method.invoke()를 호출하여 (AImple) target을 호출
+4. AImple 인스턴스의 call() 실행
+5. TimeInvocationHandler로 응답이 오면 로그 출력후 겶과 반환
+
+동적 프록시 기술 덕분에 적용대상 만큼 프록시 객체를 만들지 않아도 되고 부가 기능 로직을 한번 개발후 공통으로 사용 가능하다.
+결과적으로 하나의 클래스에 모아서 단일 책임 원칙을 지킬 수 있게 하였다.
+
+> 실행결과
+```console
+curl http://localhost:8080/v1/request\?itemId\=hello
+```
+
+```console
+ThreadLocalLogTrace   : [eb2dd8a4] IOrderController.request()
+ThreadLocalLogTrace   : [eb2dd8a4] |-->IOrderService.orderItem()
+ThreadLocalLogTrace   : [eb2dd8a4] |   |-->IOrderRepository.save()
+ThreadLocalLogTrace   : [eb2dd8a4] |   |<--IOrderRepository.save() time=1001ms
+ThreadLocalLogTrace   : [eb2dd8a4] |<--IOrderService.orderItem() time=1001ms
+ThreadLocalLogTrace   : [eb2dd8a4] IOrderController.request() time=1002ms
+```

@@ -1,7 +1,6 @@
 package me.chulgil.spring.proxy;
 
-import me.chulgil.spring.proxy.app.v4.InterfaceProxyConfig;
-import me.chulgil.spring.proxy.app.v5.ConcreteProxyConfig;
+import me.chulgil.spring.proxy.dynamic.DynamicProxyBasicConfig;
 import me.chulgil.spring.sample.trace.logtrace.LogTrace;
 import me.chulgil.spring.sample.trace.logtrace.ThreadLocalLogTrace;
 import me.chulgil.spring.util.CustomBeanNameGen;
@@ -10,13 +9,13 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-@Import(ConcreteProxyConfig.class)
-@SpringBootApplication(scanBasePackages="me.chulgil.spring.proxy.app.v5")
+@Import(DynamicProxyBasicConfig.class)
+@SpringBootApplication(scanBasePackages="me.chulgil.spring.proxy.dynamic")
 public class ProxyApplication {
 
     public static void main(String[] args) {
         CustomBeanNameGen generator = new CustomBeanNameGen();
-        generator.addBasePackages("me.chulgil.spring.proxy.app");
+        generator.addBasePackages("me.chulgil.spring.proxy.dynamic");
         new SpringApplicationBuilder(ProxyApplication.class)
                 .beanNameGenerator(generator)
                 .run(args);
