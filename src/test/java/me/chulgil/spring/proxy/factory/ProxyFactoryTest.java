@@ -1,4 +1,4 @@
-package me.chulgil.spring.proxy.factory.code;
+package me.chulgil.spring.proxy.factory;
 
 import lombok.extern.slf4j.Slf4j;
 import me.chulgil.spring.proxy.common.advice.TimeAdvice;

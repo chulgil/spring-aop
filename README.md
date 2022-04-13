@@ -475,12 +475,54 @@ ConcreteService$$EnhancerByCGLIB$$9e5e6870
 
 ### 포인트컷 / 어드바이스 / 어드바이저
 
+- 포인트컷 : 어디에 부가 기능을 적용할지 판단하는 필터링 로직으로 주로 클래스와 메서드 이름으로 필터링한다. 
 
+- 어드바이스 : 프록시가 호출하는 부가기능으로 단순 프록시 로직
+
+- 어드바이저 : 단순하게 하나의 포인트 컷과 어드바이스를 담고있음
+
+> 쉽게 기억하자면 
+> 조언(Advice)을 어디(Pointcut)에 할 것인가?
+> 조언자(Advisor)는 어디(Pointcut)에 조언(Advice) 을 해야 할지 알고 있다.
+
+
+> 역할과 책임
+- 포인트 컷은 대상 여부를 확인하는 필터 역할만 담당
+- 어드바이스는 부가 기능 로직만 담당
+- 어드바이저는 단순히 위 두개로 구성되어있음
 
 
 ### 프록시 팩토리 적용
 
+스프링은 AOP를 적용할 때 최적화를 진행해서 하나의 프록시에 여러 어드바이저를 적용한다.
+즉 하나의 target에 여러 AOP가 동시에 적용 되어도, 스프링의 AOP는 target마다 하나의 프록시만 생성한다.
 
+V1애플리케이션은 인터페이스가 있기 때문에 프록시 팩토리가 JDK동적 프록시를 적용한다.
+V2애플리케이션은 구체 클래스만 있기 때문에 CGLIB를 적용한다.
+
+> 실행 로그
+
+```console
+http://localhost:8080/v2/request?itemId=hello
+```
+
+```console
+ThreadLocalLogTrace   : [39857d1f] OrderController.request()
+ThreadLocalLogTrace   : [39857d1f] |-->OrderService.orderItem()
+ThreadLocalLogTrace   : [39857d1f] |   |-->OrderRepository.save()
+ThreadLocalLogTrace   : [39857d1f] |   |<--OrderRepository.save() time=1009ms
+ThreadLocalLogTrace   : [39857d1f] |<--OrderService.orderItem() time=1014ms
+ThreadLocalLogTrace   : [39857d1f] OrderController.request() time=1019ms
+```
+
+프록시 팩토리 덕분에 개발자는 매우 편리하게 프록시를 생성 할 수 있게 되었지만
+너무 많은 Config파일을 생성해야한다는 점과
+V3처럼 컴포넌트 스캔을 사용하는 경우라면 지금과 같은 방법으로는 프록시 적용이 불가능하다.
+실제 객체를 컴포넌트 스캔으로 컨터이너에 빈으로 등록을 다 해버린 상태이기 때문이다.
+
+따라서 ProxyFactoryConfigV1와 같이 부가 기능이 있는 프록시를 실제 객체 대신 스프링 컨테이너에 빈으로 등록해야 한다.
+
+이 두가지 문제를 해결해 주는 방법이 `Bean 후처리기` 이다.
 
 
 
