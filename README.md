@@ -423,3 +423,44 @@ ThreadLocalLogTrace   : [eb2dd8a4] IOrderController.request() time=1002ms
 - *xx : xx로 끝나면 True
 - *xx* : xx가 있으면 True
 - String[] patterns : 적용할 패턴은 생성자를 통해 외부에서 받는다.
+
+### CGLIB : Code Generator Library
+> 바이트 코드를 조작해서 동적으로 클래스를 생성해주는 라이브러리
+> 인터페이스 없이 클래스만 가지고 동적 프록시 생성 가능
+> 스프링 프레임워크의 내부 소스코드에 외부 라이브러리인 CGLIB가 포함됨
+
+
+CGLIB가 생성한 클래스의 이름은 다음 규칙과 같다.
+```console
+대상클래스$$EnhancerByCGLIB$$임의코드
+ConcreteService$$EnhancerByCGLIB$$9e5e6870
+```
+
+> 상속을 사용하므로 기존 기존 클래스 기반 프록시의 단점이 존재한다.
+> 
+> 따라서 인터페이스가 있는 경우 JDK동적 프록시를 사용하고 그렇지 않은경우 CGLIB를 사용하면 된다.
+
+다음번 해결 과제
+- 두 기술을 같이 사용한다면 부가기능 제공으로 인한 JDK->InvocationHandler와 MethodInterceptor를 중복으로 만들어서 관리
+- 특정 조건에만 프록시 로직을 적용하는 기능도 공통으로 제공되어야 한다.
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
