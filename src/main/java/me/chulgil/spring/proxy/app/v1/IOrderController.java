@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 public interface IOrderController {
 
     @GetMapping("/v1/request")
-    String request(@RequestParam("itemId") String itemIdo);
+    String request(@RequestParam("itemId") String itemId);
 
     @GetMapping("/v1/no-log")
     String noLog();

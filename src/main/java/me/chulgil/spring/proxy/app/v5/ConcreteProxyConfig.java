@@ -5,9 +5,8 @@ import me.chulgil.spring.proxy.app.v2.OrderRepository;
 import me.chulgil.spring.proxy.app.v2.OrderService;
 import me.chulgil.spring.sample.trace.logtrace.LogTrace;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
+//@Configuration
 public class ConcreteProxyConfig {
 
     @Bean
