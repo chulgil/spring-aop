@@ -878,7 +878,7 @@ implementation 'org.springframework.boot:spring-boot-starter-aop'
 - @args : 전달된 실제 인수의 런타임 타입이 주어진 타입의 애노테이션을 갖는 조인 포인트 
 - bean : 스프링 전용 포인트컷 지시자, 빈의 이름으로 포인트컷을 지정한다.
 
-### 스프링 AOP - 포인트 컷 - Execution
+### 스프링 AOP - 포인트 컷 종류
 
 > Execution 파라미터 매칭 규칙은 다음과 같다.
 - (String) : 정확하게 String 타입 파라미터
@@ -888,3 +888,54 @@ implementation 'org.springframework.boot:spring-boot-starter-aop'
 - (..) : 숫자와 무관하게 모든 파라미터, 모든 타입을 허용한다. 참고로 파라미터가 없어도 된다. 0..* 로 이해하면 된다.
 - (String, ..) : String 타입으로 시작해야 한다. 숫자와 무관하게 모든 파라미터, 모든 타입을 허용한다.
   - 예) (String) , (String, Xxx) , (String, Xxx, Xxx) 허용
+
+> execution과 args의 차이점
+- execution 은 클래스에 선언된 정보를 기반으로 판단 -> execution 은 파라미터 타입이 정확하게 매칭되어야 한다.
+- args 는 실제 넘어온 파라미터 객체 인스턴스를 보고 판단 -> args 는 부모 타입을 허용한다.
+
+> @target : 실행 객체의 클래스에 주어진 타입의 애노테이션이 있는 조인 포인트 -> 부모클래스의 메서드까지 어드바이스 적용
+> 
+> @within : 주어진 애노테이션이 있는 타입 내 조인 포인트 -> 자기자신의 클래시에 정의된 메서드에만 어드바이스 적용
+>
+> @annotation : 메서드가 주어진 애노테이션을 가지고 있는 조인 포인트를 매칭
+> 
+> @args : 전달된 실제 인수의 런타임 타입이 주어진 타입의 애노테이션을 갖는 조인 포인트
+> 
+> bean : 스프링 전용 포인트컷 지시자, 빈의 이름으로 지정한다.
+
+다음은 포인트컷 표현식을 사용해서 어드바이스에 매개변수를 전달할 수 있다.
+this, target, args,@target, @within, @annotation, @args
+
+```java
+@Before("allMember() && args(arg,..)")
+  public void logArgs3(String arg) {
+      log.info("[logArgs3] arg={}", arg);
+  }
+```
+추가로 타입이 메서드에 지정한 타입으로 제한된다. 
+여기서는 메서드의 타입이 String 으로 되어 있기 때문에 다음과 같이 정의되는 것으로 이해하면 된다.
+
+> this : 스프링 빈 객체(스프링 AOP 프록시)를 대상으로 하는 조인 포인트
+> target : Target 객체(스프링 AOP 프록시가 가르키는 실제 대상)를 대상으로 하는 조인 포인트
+
+> 설명
+- this , target 은 다음과 같이 적용 타입 하나를 정확하게 지정해야 한다. 
+- this(me.chulgil.spring.aop.member.IMemberService)
+- target(me.chulgil.spring..aop.member.MemberService) 
+- 둘다 * 같은 패턴을 사용할 수 없다.
+- 둘다 부모 타입을 허용한다. 
+
+> this vs target
+
+단순히 타입 하나를 정하면 되는데, this 와 target 은 어떤 차이가 있을까?
+스프링에서 AOP를 적용하면 실제 target 객체 대신에 프록시 객체가 스프링 빈으로 등록된다. 
+- this 는 스프링 빈으로 등록되어 있는 프록시 객체를 대상으로 포인트컷을 매칭한다.
+- target 은 실제 target 객체를 대상으로 포인트컷을 매칭한다.
+ 
+결국 프록시 생성 방식에 따른 차이가 있다.
+
+- JDK 동적 프록시: 인터페이스가 필수이고, 인터페이스를 구현한 프록시 객체를 생성한다.
+- CGLIB: 인터페이스가 있어도 구체 클래스를 상속 받아서 프록시 객체를 생성한다.
+
+> 프록시를 대상으로 하는 this의 경우 구체 클래스를 지정하면 프록시 생성 전략에 따라서 다른 결과가 나올 수 있다.
+> this, target 지시자는 단독으로 사용되기 보다는 파라미터 바인딩에서 주로 사용된다.
