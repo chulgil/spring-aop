@@ -5,6 +5,7 @@ import me.chulgil.spring.aop.order.OrderRepository;
 import me.chulgil.spring.aop.order.OrderService;
 import me.chulgil.spring.aop.order.aop.AspectV4Pointcut;
 import me.chulgil.spring.aop.order.aop.AspectV5Order;
+import me.chulgil.spring.aop.order.aop.AspectV6Advice;
 import org.junit.jupiter.api.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,7 @@ import org.springframework.context.annotation.Import;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Slf4j
-@Import({AspectV5Order.LogAspect.class, AspectV5Order.TxAspect.class})
+@Import({AspectV6Advice.class})
 @SpringBootTest
 class AopApplicationTests {
 

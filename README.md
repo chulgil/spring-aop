@@ -785,5 +785,74 @@ implementation 'org.springframework.boot:spring-boot-starter-aop'
 적용후 로그를 남기는 순서 : doTransaction() -> doLog()
 
 
+### 스프링 AOP 구현 6 - 어드바이스 종류
 
+> 어드바이스 종류
+
+- @Around : 메서드 호출 전후에 수행, 가장 강력한 어드바이스, 조인 포인트 실행 여부 선택, 반환 값 변환, 예외 변환 등이 가능
+  - @Around 와 다르게 작업 흐름을 변경할 수는 없다
+  - ProceedingJoinPoint.proceed() 를 호출해야 다음 대상이 호출된다.
+- @Before : 조인 포인트 실행 이전에 실행
+  - ProceedingJoinPoint.proceed() 자체를 사용하지 않는다. 
+  - 메서드 종료시 자동으로 다음 타켓이 호출된다. 
+  - 물론 예외가 발생하면 다음 코드가 호출되지는 않는다.
+- @AfterReturning : 조인 포인트가 정상 완료후 실행 
+  - returning 속성에 사용된 이름은 어드바이스 메서드의 매개변수 이름과 일치해야 한다.
+  - returning 절에 지정된 타입의 값을 반환하는 메서드만 대상으로 실행한다. (부모 타입을 지정하면 모든 자식 타입은 인정된다.)
+  - 반환되는 객체를 변경할 수 없다. 변경하려면 @Around를 사용해야한다.
+- @AfterThrowing : 메서드가 예외를 던지는 경우 실행
+  - throwing 속성에 사용된 이름은 어드바이스 메서드의 매개변수 이름과 일치해야 한다.
+  - throwing 절에 지정된 타입과 맞은 예외를 대상으로 실행한다. (부모 타입을 지정하면 모든 자식 타입은 인정된다.)
+- @After : 조인 포인트가 정상 또는 예외에 관계없이 실행(finally)
+  - 메서드 실행이 종료되면 실행된다. (finally를 생각하면 된다.)
+  - 정상 및 예외 반환 조건을 모두 처리한다.
+  - 일반적으로 리소스를 해제하는 데 사용한다.
+
+> 조인포인트 인터페이스의 주요 기능
+
+- getArgs() : 메서드 인수를 반환
+- getThis() : 프록시 객체를 반환
+- getTarget() : 대상 객체를 반환
+- getSignature() : 조언되는 메서드에 대한 설명을 반환
+- toString() : 조언되는 방법에 대한 유용한 설명을 인쇄
+
+> ProceedingJoinPoint 인터페이스의 주요 기능
+
+- proceed() : 다음 어드바이스나 타켓을 호출
+
+> 실행결과는 다음과 같다.
+
+```console
+[around][트랜잭션 시작] void me.chulgil.spring.aop.order.OrderService.orderItem(String)
+[before] void me.chulgil.spring.aop.order.OrderService.orderItem(String)
+[orderService] 실행
+[orderRepository] 실행
+[return] void me.chulgil.spring.aop.order.OrderService.orderItem(String) return=null
+[after] void me.chulgil.spring.aop.order.OrderService.orderItem(String)
+[around][트랜잭션 커밋] void me.chulgil.spring.aop.order.OrderService.orderItem(String)
+[around][리소스 릴리즈] void me.chulgil.spring.aop.order.OrderService.orderItem(String)
+```
+
+> 순서 
+
+- 스프링은 5.2.7 버전부터 동일한 @Aspect 안에서 동일한 조인포인트의 우선순위를 정했다.
+- 실행 순서: @Around , @Before , @After , @AfterReturning , @AfterThrowing
+- 어드바이스가 적용되는 순서는 이렇게 적용되지만, 호출 순서와 리턴 순서는 반대다.
+- @Aspect 안에 동일한 종류의 어드바이스가 2개 있으면 순서가 보장되지 않는다. 이 경우 앞서 배운 것 처럼 @Aspect 를 분리하고 @Order 를 적용하자.
+
+
+@Around 하나만 있어도 모든 기능을 수행 할 수 있지만 다른 어드바이스들이 존재하는 이유는 무엇일까?
+
+@Around는 항상 jointPoint.proceed()를 호출해야한다. 만약 실수로 호출하지 않았다면 타겟이 호출되지 않는 치명적인 버그가 발생한다.
+
+@Around는 가장 넓은 기능을 제공하지만 실수할 가능성이 있다. 반면 @Before @After는 기능은 적지만 실수할 가능성이 낮고 코드도 단순하다.
+그리고 작성한 의도가 명확하게 들어난다.
+
+> 좋은 설계는 제약이 있는 것이다. 제약은 실수를 방지하고 일종의 가이드 역할을 한다.
+> 
+> 만약 @Around를 사용했는데 중간에 다른 개발자가 해당 코드를 수정해서 호출하지 않았다면 큰 장애가 발생했을 것이다.
+> 
+> 처음부터 @Before를 사용했다면 이런 문제 자체가 발생하지 않는다.
+> 
+> 제약 덕분에 역할이 명확해져서 코드를 보고 고민해야 하는 범위가 줄어들고 코드의 의도도 파악하기 쉽다.
 
