@@ -764,3 +764,26 @@ implementation 'org.springframework.boot:spring-boot-starter-aop'
 클라이언트 -> doLog() -> doTransaction() 
   -> orderService.orderItem()
 -> doLog() -> orderRepository.save()
+
+### 스프링 AOP 구현 4 - 포인트 컷 참조
+
+> 포인트 컷을 공용으로 사용하기 위해 외부 클래스에 모아두고 외부에서 호출시에 접근제어자를 public으로 선언후 적용한다.
+
+기존 allOrder() allServer() 를 orderAndService()로 포인트컷을 만든다.
+
+포인트 컷을 여러 어드바이스에서 사용할때 이 방법을 사용하면 효과적이다.
+
+### 스프링 AOP 구현 5 - 어드바이스 순서
+
+어드바이스는 기본적으로 순서를 보장하지 않기 때문에 순서를 지정할 경우엔 
+@Aspect 적용 단위로 org.springframework.core.annotation.@Order 애노테이션을 적용해야 한다.
+하지만 어드바이스 단위가 아닌 클래스 단위로 적용되기 때문에 지금처럼 하나의 애스펙트에 여러 어드바이스가 있으면 순서보장이 안된다.
+
+따라서 애스펙트를 별도의 클래스로 분리해야한다.
+
+적용전 로그를 남기는 순서 : doLog() -> doTransaction()
+적용후 로그를 남기는 순서 : doTransaction() -> doLog()
+
+
+
+
