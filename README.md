@@ -592,4 +592,22 @@ http://localhost:8080/v1/no-log
   - execution(* hello.proxy.app..) : 해당 패키지와 그 하위패키지 내 
   - *(..) : 모든 메서드의 이름으로 매칭
   - 단순히 package기준으로 포인트 컷 매칭을 하기때문에 lo-log메서드의 실행 로그가 출력됨
+- V3 : AspectJExpressionPointcut : 포인트 컷 표현식 적용 
+  - 표현식 추가 : && !execution(*me.chulgil.spring.proxy.app..noLog(..))
+  - 패키지와 하위 패키지의 모든 메서드는 포인터컷 매칭하되, noLog메서드는 제외하라는 설정이다.
+  - 다시 실행해보면 noLog로그가 남지 않는다.
   
+> 프록시 자동 생성기 상황별 정리
+
+ 스프링 빈이 제공하는 포인트 컷을 모두 만족한다면 프록시 자동 생성기는 프록시를 몇개 생성할까? 
+ - advisor1의 포인트 컷만 만족 -> 프록시 1개 생성, 프록시에 advisor1만 포함
+ - advisor1,2의 포인트 컷을 만족 -> 프록시 1개 생성, 프록시에 advisor1,2 모두포함
+ - advisor1,2의 포인트 컷을 모두 만족X -> 프록시가 생성되지 않음 
+
+스프링의 AOP도 동일한 방식으로 동작한다.
+
+프록시 자동 생성기인 AnnotationAwareAspectJAutoProxyCreator덕분에 매우 편리하게 프록시를 적용할 수 있다.
+이제 Advisor만 스프링 빈으로 등록하면된다.
+
+> 더 편리한 방법으로는 
+> @Aspect 애노테이션을 사용해서 더 편리하게 포인트 컷과 어드바이스를 만들고 프록시를 적용하는 방법도 있다.
