@@ -3,9 +3,7 @@ package me.chulgil.spring.aop;
 import lombok.extern.slf4j.Slf4j;
 import me.chulgil.spring.aop.order.OrderRepository;
 import me.chulgil.spring.aop.order.OrderService;
-import me.chulgil.spring.aop.order.aop.AspectV1;
-import me.chulgil.spring.aop.order.aop.AspectV2;
-import me.chulgil.spring.aop.order.aop.AspectV3;
+import me.chulgil.spring.aop.order.aop.AspectV4Pointcut;
 import org.junit.jupiter.api.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +13,7 @@ import org.springframework.context.annotation.Import;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Slf4j
-@Import(AspectV3.class)
+@Import(AspectV4Pointcut.class)
 @SpringBootTest
 class AopApplicationTests {
 
