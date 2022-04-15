@@ -742,3 +742,25 @@ implementation 'org.springframework.boot:spring-boot-starter-aop'
    * 다른 애스팩트에서 참고하려면 public을 사용하고 그렇지 않은경우는 private를 사용한다.
 
 ### 스프링 AOP 구현 3 - 어드바이스 추가
+
+> 로그를 출력하는 기능에 추가로 단순 트랜잭션을 적용하는 코드를 추가할 것이다.
+> 트랜잭션 기능은 보통 다음과 같이 동작한다.
+
+ - 핵심 로직 실행 직전에 트랜잭션 시작
+ - 핵심 로직 실행
+ - 핵심 로직 실행에 문제가 없으면 커밋
+ - 핵심 로직 실행에 예외바 발생하면 롤백
+ 
+포인트컷이 적용된 AOP는 다음과 같다.
+- orderService: doLog(), doTransaction() 어드바이스 적용
+- orderRepository: doLog() 어드바이스 적용
+
+> AOP 적용 전
+
+클라이언트 -> orderSerivce.orderItem() -> orderRepository.save()
+
+> AOP 적용 후
+
+클라이언트 -> doLog() -> doTransaction() 
+  -> orderService.orderItem()
+-> doLog() -> orderRepository.save()
