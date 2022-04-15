@@ -1,5 +1,6 @@
 package me.chulgil.spring.proxy;
 
+import me.chulgil.spring.proxy.aop.AopConfig;
 import me.chulgil.spring.proxy.app.autoproxy.AutoProxyConfig;
 import me.chulgil.spring.sample.trace.logtrace.LogTrace;
 import me.chulgil.spring.sample.trace.logtrace.ThreadLocalLogTrace;
@@ -9,7 +10,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-@Import(AutoProxyConfig.class)
+@Import(AopConfig.class)
 @SpringBootApplication(scanBasePackages = "me.chulgil.spring.proxy.app")
 public class ProxyApplication {
 
