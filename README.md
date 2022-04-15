@@ -713,3 +713,32 @@ build.gradle에 다음을 추가
 implementation 'org.springframework.boot:spring-boot-starter-aop'
 ```
 @Aspect를 사용하려면 @EnableAspectJAutoProxy를 스프링 설정에 추가해야 하지만 스프링 부트를 사용하는 경우는 자동으로 추가된다.
+
+
+### 스프링 AOP 구현 1
+
+> @Aspect를 포함한 org.aspectj 패키지 관련기능은 aspectweaver.jar라이브러리가 제공하는 기능이다.
+> 
+> 스프링에서는 AOP기능과 함께 aspectweaver.jar도 함께 사용할 수 있게 의존관계에도 포함된다.
+> 
+> 애노테이션이나 관련 인터페이스만 사용하는 것이라서 실제 AspectJ가 제공하는 컴파일 로드타임 위버를 사용하는 것은 아니다.
+> 
+> 스프링은 지금까지 구현했던것 처럼 프록시 방식의 AOP를 사용한다.
+
+@Aspect는 애스팩트라는 표식이지 컴포넌트 스캔이 동작하지 않아서 AspectV1을 사용하려면 빈으로 등록해야한다.
+
+스프링 빈으로 사용하는 방법은 다음과 같다.
+
+1. @Bean : 을 사용해서 직접 등록
+2. @Component : 컴포넌트 스캔을 사용해서 자동 등록
+3. @Import : 주로 설정파일을 추가할 때 사용 (@Configuration)
+
+### 스프링 AOP 구현 2 - 포인트컷 분리
+
+@Around 에 포인트컷 표현식을 직접 넣을 수 도 있지만 @Pointcut 애노테이션을 사용해서 별도로 분리할 수 있다.
+
+   * 포인트컷 시그니처 : 메서드 이름과 파라미터를 합친것으로 주문과 관련된 모든 기능을 대상으로 하는 포인트 컷이다.
+   * 반환 타입은 void로 코드의 내용은 비워둬야 한다.
+   * 다른 애스팩트에서 참고하려면 public을 사용하고 그렇지 않은경우는 private를 사용한다.
+
+### 스프링 AOP 구현 3 - 어드바이스 추가
