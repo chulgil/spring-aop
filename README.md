@@ -587,3 +587,9 @@ http://localhost:8080/v1/no-log
 
 결록적으로 패키이에 메서드 이름까지 함께 지정할 수 있는 정밀한 포인트 컷이 필요하다.
 
+- V1 : NameMatchMethodPointcut : 모든 메서드의 이름이 매칭 대상
+- V2 : AspectJExpressionPointcut : 포인트 컷 표현식 적용 
+  - execution(* hello.proxy.app..) : 해당 패키지와 그 하위패키지 내 
+  - *(..) : 모든 메서드의 이름으로 매칭
+  - 단순히 package기준으로 포인트 컷 매칭을 하기때문에 lo-log메서드의 실행 로그가 출력됨
+  
