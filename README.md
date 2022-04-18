@@ -950,14 +950,75 @@ this, target, args,@target, @within, @annotation, @args
  5번에 1번정도 실패하는 저장소가 있다면 실패할 경우 재시도 하는 AOP가 있으면 편리하다.
 
 
+## 13. 스프링 AOP - 주의사항
+
+### 프록시와 내부 호출 문제
 
 
+스프링은 프록시 방식의 AOP를 사용하기 때문에 항상 프록시를 통해서 대상 객체(Target)을 호출해야 한다.
+만약 프록시를 거치지 않고 직접 대상을 호출하게 되면 AOP가 적용되지 않고 어드바이스도 호출 되지 않는다.
+
+AOP를 적용하려면 항상 객체 대신에 프록시를 스프링 빈으로 등록해야 하는데 스프링의 경우 의존관계 주입시 
+항상 프록시 객체를 주입하고 있어서 별 문제가 되지 않는다.
+하지만 객체 내부에서 메서드 호출이 발생하면 프록시를 거치지 않기 때문에 문제가 발생하게 된다.
+
+> 아래와 같은 경우 internal에 대해서는 AOP적용이 되지 않는다.
+```java
+public void external() {
+    this.internal(); 
+}
+public void internal() {}
+```
+
+> 대안1 : 자기 자신 주입
+
+아래 callServiceV1은 실제 자신이 아니라 주입받은 프록시 객체이다. 
+생성자 주입의 경우는 본인을 생성하면서 주입하기때문에 순환 사이클 오류가 발생하기 때문에 set으로 주입하도록 한다.
+
+```java
+private CallServiceV1 callServiceV1;
+@Autowired
+public void setCallServiceV1(CallServiceV1 callServiceV1) {
+    this.callServiceV1 = callServiceV1;
+}
+
+public void external() {
+    callServiceV1.internal();
+}
+```
 
 
+참고 : 스프링 버전이2.6.0 이상인 경우 순환참조 기능이 디폴트로 사용하지 않음으로 되어있음으로 아래와 같이 프로퍼티에 설정해 주어야 동작한다.
+```console
+spring.main.allow-circular-references=true
+```
 
+### 대안2 : 지연 조회
 
+> 스프링 빈을 지연해서 조회하는 방법으로 ObjectProvider(Provider), ApplicationContext를 사용한다.
 
+ObjectProvider는 스프링 컨테이너에서 조회하는 것을 빈 생성 시점이 아니라 실제 객체를 사용하는 시점으로 지연할 수 있다.
+아라서 callServiceProvider.getObject()를 호출하는 시점에 빈을 조회한다.
+또한 자기 자신을 주입 받는 것이 아니기 때문에 순환 사이클이 발생하지 않는다.
 
+```java
+private final ObjectProvider<CallServiceV2> callServiceProvider;
+
+public void external() {
+    CallServiceV2 callServiceV2 = callServiceProvider.getObject();
+    callServiceV2.internal();
+}
+
+public void internal() {}
+```
+
+### 대안3 : 구조 변경
+
+가장 나은 대안은 내부 호출이 발생하지 않도록 구조를 변경하는 방법으로 이 방법이 가장 권장된다.
+
+AOP는 주로 트랜잭션 적용이나 주요 컴포넌트의 로그 출력 기능에 사용된다.
+인터페이스에 메서드가 나올정도의 규모에 AOP를 사용하는 것이 적당하다.
+즉 public메서드에만 적용하고 private메서드 처럼 작은 단위에는 AOP를 적용하지 않는다.
 
 
 
